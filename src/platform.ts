@@ -51,6 +51,9 @@ export class CECTVControl implements DynamicPlatformPlugin {
   //The device's default name.
   name = 'CEC TV';
 
+  //The platform name.
+  platformName = PLATFORM_NAME;
+
   constructor (public readonly log: Logger, 
                 public readonly config: PlatformConfig,
                 public readonly api: API) {
