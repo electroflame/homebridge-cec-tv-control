@@ -32,11 +32,6 @@ class CECHelper {
   }
 }
 
-/**
- * HomebridgePlatform
- * This class is the main constructor for your plugin, this is where you should
- * parse the user config and discover/register accessories with Homebridge.
- */
 export class CECTVControl implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
   public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
@@ -44,10 +39,16 @@ export class CECTVControl implements DynamicPlatformPlugin {
   // this is used to track restored cached accessories
   public readonly cachedAccessories: PlatformAccessory[] = [];
 
+  //The time (in milliseconds) that we'll wait after completing any tvEvent before finishing them up.
   EventWaitTimeout = 5000;
+
+  //The time (in milliseconds) that we'll wait before checking device status for updates.
   UpdatePollDelay = 2500;
+
+  //The tvService that will get initialized below.
   tvService;
 
+  //The device's default name.
   name = 'CEC TV';
 
   constructor (public readonly log: Logger, 
@@ -55,6 +56,12 @@ export class CECTVControl implements DynamicPlatformPlugin {
                 public readonly api: API) {
     this.log.info('Initializing TV service');
     
+    if(!this.verify()) {
+      this.log.error('The service could not be initialized.');
+
+      //Bail out early as something's gone wrong.
+      return;
+    }
 
     const tvName = this.config.name || 'CEC TV';
     const UUID = this.api.hap.uuid.generate(PLUGIN_NAME);    
@@ -162,8 +169,14 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
   verify() {
     if(cecClient === null) {
+      this.log.error('CEC-Client was not found.  Is it currently installed?');
+
+      //This is a fatal error, return false to bail out early.
       return false;
     }
+
+    //If no problems were detected, return true.
+    return true;
   }
 
   loadFromConfig(config: PlatformConfig) {
@@ -172,6 +185,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
       return;
     }
 
+    this.name = config.name || 'CEC TV';
     this.UpdatePollDelay = config.pollInterval as number || 2500;
   }
 
