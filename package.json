@@ -1,5 +1,4 @@
 {
-  "private": true,
   "displayName": "CEC TV Control",
   "name": "homebridge-cec-tv-control",
   "version": "0.1.0",
