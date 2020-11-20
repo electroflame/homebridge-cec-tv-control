@@ -1,0 +1,25 @@
+{
+  "pluginAlias": "TVCECControl",
+  "pluginType": "platform",
+  "headerDisplay": "The CEC TV Controls Platform plugin exposes an HDMI-connected and CEC-enabled device as a TV in Homebridge.  This lets you control various functions (such as power) in one convenient location.",
+  "singular": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "required": true,
+        "default": "CEC TV"
+      },
+      "pollInterval": {
+        "title": "Polling Interval",
+        "type": "integer",
+        "description": "The time (in milliseconds) to wait before polling the CEC device for its status.  For example, 2500 milliseconds is 2.5 seconds.  Polling too quickly may result in inaccurate results.",
+        "required": true,
+        "default": "2500",
+        "minimum": "1000"
+      }
+    }
+  }
+}
