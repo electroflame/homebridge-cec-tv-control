@@ -39,10 +39,14 @@ export class CECTVControl implements DynamicPlatformPlugin {
   // this is used to track restored cached accessories
   public readonly cachedAccessories: PlatformAccessory[] = [];
 
-  //The time (in milliseconds) that we'll wait after completing any tvEvent before finishing them up.
+  /**
+   * The time (in milliseconds) that we'll wait after completing any tvEvent before finishing them up.
+   **/
   EventWaitTimeout = 5000;
 
-  //The time (in milliseconds) that we'll wait before checking device status for updates.
+  /**
+   * The time (in milliseconds) that we'll wait before checking device status for updates.
+   **/ 
   UpdatePollDelay = 2500;
 
   //The tvService that will get initialized below.
@@ -57,10 +61,13 @@ export class CECTVControl implements DynamicPlatformPlugin {
   constructor (public readonly log: Logger, 
                 public readonly config: PlatformConfig,
                 public readonly api: API) {
+
+    //Load the config values.
+    this.loadFromConfig(this.config);
+
     this.log.info('Initializing TV service');
     
     if(!this.verify()) {
-      this.log.error('The service could not be initialized.');
 
       //Bail out early as something's gone wrong.
       return;
@@ -170,16 +177,36 @@ export class CECTVControl implements DynamicPlatformPlugin {
     this.api.publishExternalAccessories(PLUGIN_NAME, [tvAccessory]);
   }
 
+  /**
+   * This method runs various verification checks to make sure we can proceed with initialization.
+   * Returns true if verification passed, and false if it failed.
+   */
   verify() {
+    let verificationStatus = true;
+
     if(cecClient === null) {
       this.log.error('CEC-Client was not found.  Is it currently installed?');
 
       //This is a fatal error, return false to bail out early.
-      return false;
+      verificationStatus = false;
     }
 
-    //If no problems were detected, return true.
-    return true;
+    if(!this.config) {
+      this.log.error('Could not load from the config.  Was the configuration information added properly?');
+    } else {
+      //Add a log entry if the plugin is disabled in the config, just in case somebody forgets.
+      if(this.config.pluginEnabled === false) {
+        this.log.info('This plugin is disabled in its config.  Initialization will not proceed.');
+      }
+    }
+
+    //If verification failed, log an error message.
+    if(verificationStatus === false) {
+      this.log.error('The service could not be initialized.  More information regarding why should have been logged above.');
+    }
+
+    //Return the verificationStatus, which will either let us continue to initialize, or bail out if an error was detected.
+    return verificationStatus;
   }
 
   loadFromConfig(config: PlatformConfig) {
@@ -189,7 +216,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
     }
 
     this.name = config.name || 'CEC TV';
-    this.UpdatePollDelay = config.pollInterval as number || 2500;
+    this.UpdatePollDelay = config.pollingInterval as number || 2500;
   }
 
   pollForUpdates() {
