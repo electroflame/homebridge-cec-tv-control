@@ -89,11 +89,11 @@ export class CECTVControl implements DynamicPlatformPlugin {
       .on('get', this.getPowerStatus.bind(this))
       .on('set', this.setPowerStatus.bind(this));
 
-    this.log.info('Hooking into cec-client processes');
+    this.log.info('Hooking into cec-client process');
     //Set up a cecClient callback for every time stdout is updated.
     cecClient.stdout.on('data', data => {
       const cecTraffic = data.toString();
-      this.log.info(cecTraffic);
+      this.log.debug(cecTraffic);
 
       //Try to detect when CEC-Client changes the OSD name, and change it to something else.
       if (cecTraffic.indexOf('<< 10:47:43:45:43') !== -1) {
