@@ -72,7 +72,6 @@ export class CECTVControl implements DynamicPlatformPlugin {
       //Bail out early as something's gone wrong.
       return;
     }
-
     const tvName = this.config.name || 'CEC TV';
     const UUID = this.api.hap.uuid.generate(PLUGIN_NAME);    
     const tvAccessory = new api.platformAccessory(tvName, UUID);
@@ -197,6 +196,8 @@ export class CECTVControl implements DynamicPlatformPlugin {
       //Add a log entry if the plugin is disabled in the config, just in case somebody forgets.
       if(this.config.pluginEnabled === false) {
         this.log.info('This plugin is disabled in its config.  Initialization will not proceed.');
+
+        verificationStatus = false;
       }
     }
 

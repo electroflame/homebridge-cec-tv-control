@@ -1,5 +1,5 @@
 {
-  "pluginAlias": "CECTVControl",
+  "pluginAlias": "TVCECControl",
   "pluginType": "platform",
   "headerDisplay": "The CEC TV Controls Platform plugin exposes an HDMI-connected and CEC-enabled device as a TV in Homebridge.  This lets you control various functions (such as power) in one convenient location.",
   "singular": true,

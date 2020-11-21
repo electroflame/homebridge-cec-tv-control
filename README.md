@@ -16,7 +16,7 @@ Javascript and Typescript are not my main languages -- pointers, tips, and input
 3. Install the `cec-utils` package if the `cec-client` command is not present in your terminal: `sudo apt-get install cec-utils`
 * Additionally, cec-utils might not be available based on what distribution you're using.  You can also search for libCEC, as that might be packaged and available in your package manager.
 * On Raspberry Pi's OSMC image, `cec-cilent` is present at `/usr/osmc/bin/cec-client-4.0.2`, you'll need to run `sudo ln -s /usr/osmc/bin/cec-client-4.0.2 /usr/bin/cec-client` to link it to the default `$PATH` 
-4. Add the `CECTVControl` platform to your configuration file.  If you're using [homebridge-ui-x](https://github.com/oznu/homebridge-config-ui-x) you should be able to configure this right in the UI.  Otherwise, you can see an example configuration below.
+4. Add the `TVCECControl` platform to your configuration file.  If you're using [homebridge-ui-x](https://github.com/oznu/homebridge-config-ui-x) you should be able to configure this right in the UI.  Otherwise, you can see an example configuration below.
 5. Since this plugin gets registered as an External Accessory in Homebridge, you'll need to register it manually and input your Homebridge authentication code to link it.  More information is output in the Homebridge log when the plugin is loaded.
 
 ### Config
@@ -27,7 +27,7 @@ platforms": [
         "name": "CEC TV",
         "pluginEnabled": true,
         "pollingInterval": 2500,
-        "platform": "CECTVControl"
+        "platform": "TVCECControl"
     }
 ]
 ```
@@ -36,4 +36,5 @@ platforms": [
 
 
 *Based on Dominick Han's [homebridge-tv-cec plugin](https://github.com/dominick-han/homebridge-tv-cec)*
+
 *Uses cec-client, which is part of [Pulse-Eight's libCEC](https://github.com/Pulse-Eight/libcec).*
