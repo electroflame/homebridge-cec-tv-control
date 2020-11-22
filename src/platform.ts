@@ -2,10 +2,10 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 
-import events = require('events');
+import {EventEmitter} from 'events';
 import {spawn} from 'child_process';
 const cecClient = spawn('cec-client', ['-d', '8']);
-const tvEvent = new events.EventEmitter();
+const tvEvent = new EventEmitter();
 
 class CECHelper {
   public static Event_PowerOn = '01:90:00';
@@ -221,6 +221,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
   }
 
   pollForUpdates() {
+    this.log.debug('Requesting CEC Device status');
     CECHelper.RequestPowerStatus();
   }
 
@@ -230,34 +231,19 @@ export class CECTVControl implements DynamicPlatformPlugin {
     CECHelper.RequestPowerStatus();
 
     callback();
-
-    //I don't think this is actually needed.  Requesting the power status should be enough.
-    /* const handler = () => {
-      handler.activated = true;
-      callback(null, true);
-      this.log.info('TV is on');
-    };
-    tvEvent.once('POWER_ON', handler);
-
-    setTimeout(() => {
-      tvEvent.removeListener('POWER_ON', handler);
-      if(!handler.activated) {
-        callback(null, false);
-        this.log.info('TV is off');
-      }
-    }, 1000);*/
   }
 
   setPowerStatus(value, callback) {
     this.log.info(`Turning TV ${value ? 'on' : 'off'}`);
 
     if(value === this.tvService.getCharacteristic(this.Characteristic.Active).value) {
-      callback();
       this.log.info(`TV is already ${value ? 'on' : 'off'}`);
     }
 
     //Send the on or off signal.
     CECHelper.ChangePowerStatusTo(value);
+
+    callback();
   }
 
   /**
