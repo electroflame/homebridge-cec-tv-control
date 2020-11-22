@@ -78,11 +78,19 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
     tvAccessory.category = this.api.hap.Categories.TELEVISION;
 
+    //Set up the AccessoryInformation Service.
+    //There isn't really any information to add right now, but it'll prevent Homekit from displaying "Default" entries.
+    tvAccessory.getService(this.Service.AccessoryInformation)
+      ?.setCharacteristic(this.Characteristic.Manufacturer, 'N/A')
+      .setCharacteristic(this.Characteristic.Model, 'N/A')
+      .setCharacteristic(this.Characteristic.SerialNumber, 'N/A')
+      .setCharacteristic(this.Characteristic.FirmwareRevision, 'N/A');
+
     this.tvService = new this.Service.Television(this.name, 'tvService');
 
     this.tvService.setCharacteristic(this.Characteristic.ConfiguredName, tvName);
     this.tvService.setCharacteristic(this.Characteristic.SleepDiscoveryMode, this.Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
-    
+
     //Bind our power status callbacks.
     this.tvService.getCharacteristic(this.Characteristic.Active)
       .on('get', this.getPowerStatus.bind(this))
