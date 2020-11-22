@@ -15,8 +15,14 @@ class CECHelper {
   //Note: this is a broadcast event that'll turn off the TV and any linked devices.
   public static Event_PowerOffBROADCAST = '0f:36';
 
+  public static Event_ActiveSourceRequest = '0f:85';
+
   static RequestPowerStatus() {
     this.writeCECCommand(this.Event_PowerRequest);
+  }
+
+  static RequestActiveSource() {
+    this.writeCECCommand(this.Event_ActiveSourceRequest);
   }
 
   static ChangePowerStatusTo(value: boolean) {
@@ -51,6 +57,9 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
   //The tvService that will get initialized below.
   tvService;
+
+  //The array of HDMI inputs.
+  inputs;
 
   //The device's default name.
   name = 'CEC TV';
@@ -175,6 +184,9 @@ export class CECTVControl implements DynamicPlatformPlugin {
     //Set up an automatic callback to call our pollforUpdates method according to our specified poll delay.
     setInterval(this.pollForUpdates.bind(this), this.UpdatePollDelay);
 
+    //Set up our input sources before we're done.
+    this.setupInputSources(tvAccessory);
+    
     this.log.debug('Finished initializing platform:', this.config.name);
 
     //Add our tvService to our accessory before publishing. 
@@ -209,6 +221,13 @@ export class CECTVControl implements DynamicPlatformPlugin {
       }
     }
 
+    //Check if our inputs array is valid.
+    if(this.inputs === null || this.inputs === undefined || this.inputs.length <= 0) {
+      this.log.error('Could not load input sources from config.  Do you have at least one HDMI input source defined in your config?');
+
+      verificationStatus = false;
+    }
+
     //If verification failed, log an error message.
     if(verificationStatus === false) {
       this.log.error('The service could not be initialized.  More information regarding why should have been logged above.');
@@ -226,6 +245,13 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
     this.name = config.name || 'CEC TV';
     this.UpdatePollDelay = config.pollingInterval as number || 2500;
+    this.inputs = config.inputs;
+
+    //Double-check that the input array is actually set up as an array.
+    //If it's not, try and cast it to an array here.
+    if(Array.isArray(this.inputs) === false) {
+      this.inputs = [this.inputs];
+    }
   }
 
   pollForUpdates() {
@@ -252,6 +278,29 @@ export class CECTVControl implements DynamicPlatformPlugin {
     CECHelper.ChangePowerStatusTo(value);
 
     callback();
+  }
+
+  setupInputSources(tvAccessory: PlatformAccessory) {
+    this.inputs.forEach((value, i) => {
+
+      //Set up some variables to hold the input data from the config.
+      const inputID = value.inputNumber as number;
+      const inputName = value.displayName as string;
+    
+      const input = new this.Service.InputSource('' + inputID, 'inputSource' + i);
+      
+      input
+        .setCharacteristic(this.Characteristic.Identifier, inputID)
+        .setCharacteristic(this.Characteristic.ConfiguredName, inputName)
+        .setCharacteristic(this.Characteristic.IsConfigured, this.Characteristic.IsConfigured.CONFIGURED)
+        .setCharacteristic(this.Characteristic.InputSourceType, this.Characteristic.InputSourceType.APPLICATION)
+        .setCharacteristic(this.Characteristic.CurrentVisibilityState, this.Characteristic.CurrentVisibilityState.SHOWN);
+
+      this.log.debug('Adding input source with inputID of ' + inputID + ' and displayName of ' + inputName + '.');
+
+      tvAccessory.addService(input);
+      this.tvService.addLinkedService(input);
+    });
   }
 
   /**

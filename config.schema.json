@@ -26,6 +26,28 @@
         "minimum": 1000,
         "required": true,
         "description": "The time (in milliseconds) to wait before polling the CEC device for its status.  For example, 2500 milliseconds is 2.5 seconds.  Polling too quickly may result in inaccurate results."
+      },
+      "inputs": {
+        "title": "List of the HDMI inputs supported by your device",
+        "description": "The List of inputs.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "inputNumber": {
+              "title": "Input Number",
+              "type": "number",
+              "required": true
+            },
+            "displayName": {
+              "title": "Input Name",
+              "type": "string",
+              "description": "This is the name that will be exposed to Homekit (and shown in the input selector for the device).",
+              "placeholder": "HDMI Source",
+              "required": true
+            }
+          }
+        }
       }
     }
   }
