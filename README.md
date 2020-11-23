@@ -1,4 +1,4 @@
-# homebridge-tv-cec-platform
+# homebridge-cec-tv-control
 
 [![NPM version](https://badge.fury.io/js/homebridge-cec-tv-control.svg)](https://npmjs.org/package/homebridge-cec-tv-control)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)
