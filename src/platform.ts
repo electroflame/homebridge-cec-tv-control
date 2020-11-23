@@ -8,8 +8,28 @@ const cecClient = spawn('cec-client', ['-d', '8']);
 const tvEvent = new EventEmitter();
 
 class CECHelper {
+
+  //Note: These codes were worked out via CEC-O-Matic (cec-o-matic.com).
+  //      The last line of each comment represents how the CEC Frame is formulated.
+  //      They represent which source device goes to which destination (i.e. TV -> Recording 1),
+  //      and which event type is represented (i.e. Report Power Status).
+
+  /**
+   * The CEC frame that's returned/reported when a device's power status is ON.
+   * TV -> Recording 1 | Report Power Status: On
+   */
   public static Event_PowerOn = '01:90:00';
+
+  /**
+   * The CEC frame that's returned/reported when a device's power status is STANDBY.
+   * TV -> Recording 1 | Report Power Status: Standby
+   */
   public static Event_PowerStandby = '01:90:01';
+
+  /**
+   * The CEC frame for requesting a device's power status.
+   * Recording 1 -> TV | Give Device Power Status
+   */
   public static Event_PowerRequest = '10:8f';
 
   /**
@@ -31,6 +51,10 @@ class CECHelper {
    */
   public static Event_TurnPowerOffBROADCAST = '0f:36';
 
+  /**
+   * The CEC frame for requesting the current status of the system/source device.
+   * TV -> Broadcast | Request Active Source
+   */
   public static Event_ActiveSourceRequest = '0f:85';
 
   static RequestPowerStatus() {
@@ -46,10 +70,6 @@ class CECHelper {
   }
   
   static writeCECCommand(stringData: string) {
-    cecClient.stdin.write('tx ' + stringData + '\n');
-  }
-
-  static checkCECCommand(stringData: string) {
     cecClient.stdin.write('tx ' + stringData + '\n');
   }
 }
