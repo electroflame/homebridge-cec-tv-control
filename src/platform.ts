@@ -12,8 +12,24 @@ class CECHelper {
   public static Event_PowerStandby = '01:90:01';
   public static Event_PowerRequest = '10:8f';
 
-  //Note: this is a broadcast event that'll turn off the TV and any linked devices.
-  public static Event_PowerOffBROADCAST = '0f:36';
+  /**
+   * The CEC frame for turning the device on (switching to Active state.)
+   * Recording 1 -> TV | Image View On
+   */
+  public static Event_TurnPowerOn = '10:04';
+
+  /**
+   * The CEC frame for turning the device off/putting it in standby (switching to Standby state.)
+   * Recording 1 -> TV | Standby
+   */
+  public static Event_TurnPowerStandby = '10:36';
+
+  /**
+   * The CEC frame for turning the device off/putting it in standby (switching to Standby state.)
+   * This is a broadcast event that should turn everything off in the HDMI device chain.
+   * TV -> Broadcast | Standby
+   */
+  public static Event_TurnPowerOffBROADCAST = '0f:36';
 
   public static Event_ActiveSourceRequest = '0f:85';
 
@@ -26,7 +42,7 @@ class CECHelper {
   }
 
   static ChangePowerStatusTo(value: boolean) {
-    this.writeCECCommand(value ? this.Event_PowerOn : this.Event_PowerStandby);
+    this.writeCECCommand(value ? this.Event_TurnPowerOn : this.Event_TurnPowerStandby);
   }
   
   static writeCECCommand(stringData: string) {
