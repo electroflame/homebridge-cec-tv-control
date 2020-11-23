@@ -28,8 +28,8 @@
         "description": "The time (in milliseconds) to wait before polling the CEC device for its status.  For example, 2500 milliseconds is 2.5 seconds.  Polling too quickly may result in inaccurate results."
       },
       "inputs": {
-        "title": "List of the HDMI inputs supported by your device",
-        "description": "The List of inputs.",
+        "title": "HDMI Inputs (Not Functional Yet)",
+        "description": "A list of the HDMI inputs supported by your device.",
         "type": "array",
         "items": {
           "type": "object",
@@ -37,6 +37,7 @@
             "inputNumber": {
               "title": "Input Number",
               "type": "number",
+              "description": "This is the input source number, i.e. if this is for HDMI 1 this should be 1.",
               "required": true
             },
             "displayName": {
