@@ -331,6 +331,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
   pollForUpdates() {
     this.log.debug('Requesting CEC Device status');
     CECHelper.RequestPowerStatus();
+    CECHelper.RequestActiveSource();
   }
 
   getPowerStatus(callback) {
@@ -392,13 +393,14 @@ export class CECTVControl implements DynamicPlatformPlugin {
   setInputStatus(value : number, callback) {
 
     //Try to check that our input value is within sane limits, and bail out if its not.
-    if(value <= 0 || value >= this.inputs.length) {
+    if(value <= 0 || value > this.inputs.length) {
       this.log.error('Could not change TV active source, desired input value was out-of-bounds.' 
                       + ' (value = ' + value + '| array length = ' + this.inputs.length + ')');
       return;
     }
 
-    const desiredInput = this.inputs[value];
+    //Note: we use value - 1 here to convert our value to zero-based for array indexing.
+    const desiredInput = this.inputs[value - 1];
 
     this.log.info('Changing TV active source to ' + desiredInput.displayName + '(Source ' + desiredInput.inputNumber + ')');
 
