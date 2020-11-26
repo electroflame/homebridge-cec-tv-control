@@ -57,6 +57,13 @@ class CECHelper {
    */
   public static Event_ActiveSourceRequest = '0f:85';
 
+  /**
+   * The CEC frame for indicating that this source would like to become the active source.
+   * Note: This is NOT usable directly, as it requires having the X character replaced with the desired input value.
+   * Recording 1 -> Broadcast | Active Source
+   */
+  public static Event_ChangeActiveSource = '1f:82:X0:00';
+
   static RequestPowerStatus() {
     this.writeCECCommand(this.Event_PowerRequest);
   }
@@ -67,6 +74,21 @@ class CECHelper {
 
   static ChangePowerStatusTo(value: boolean) {
     this.writeCECCommand(value ? this.Event_TurnPowerOn : this.Event_TurnPowerStandby);
+  }
+
+  /**
+   * Sends a CEC frame requesting that the Active Source be changed to the source specified.
+   * @param value A number representing the input source we'd like to change to.
+   */
+  static ChangeInputTo(value: number) {
+    
+    //Store our frame string here so we can operate on it below.
+    const frame = this.Event_ChangeActiveSource;
+
+    //Replace the X in our frame string with the proper input value.
+    frame.replace('X', value.toString());
+
+    this.writeCECCommand(frame);
   }
   
   static writeCECCommand(stringData: string) {
@@ -142,6 +164,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
       .on('set', this.setPowerStatus.bind(this));
 
     this.log.info('Hooking into cec-client process');
+    
     //Set up a cecClient callback for every time stdout is updated.
     cecClient.stdout.on('data', data => {
       const cecTraffic = data.toString();
@@ -168,9 +191,19 @@ export class CECTVControl implements DynamicPlatformPlugin {
       }
 
       //If an event that wants to change the current input source is written to the buffer...
-      const match = />> (0f:80:\d0:00|0f:86):(\d)0:00/.exec(cecTraffic);
-      if (match) {
-        tvEvent.emit('INPUT_SWITCHED', match[2]);
+
+      //This is basically checking two separate CEC frames: Routing Change, and Set Stream Path.
+      //The first frame is a long one, e.g. 0f:80:X0:00:Y0:00, which specifies that the device is changing from source X to source Y.
+      //The second frame is shorter, e.g. 0f:86:X0:00, which basically specifies that the device is requesting a change to source X.
+      //Depending on how the device implements the CEC spec, it could send either of these frames back, so it's best to check for both.
+      const inputSwitchMatch = />> (0f:80:\d0:00|0f:86):(\d)0:00/.exec(cecTraffic);
+      if (inputSwitchMatch) {
+        tvEvent.emit('INPUT_SWITCHED', inputSwitchMatch[2]);
+      }
+
+      const inputRequestMatch = />> 0f:82:\d0:00/.exec(cecTraffic);
+      if (inputRequestMatch) {
+        tvEvent.emit('INPUT_REQUEST', inputRequestMatch[2]);
       }
 
     });
@@ -214,6 +247,11 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
     tvEvent.on('INPUT_SWITCHED', port => {
       this.log.debug(`CEC: Input switched to HDMI${port}`);
+      this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier).updateValue(parseInt(port));
+    });
+
+    tvEvent.on('INPUT_REQUEST', port => {
+      this.log.debug(`CEC: Input is HDMI${port}`);
       this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier).updateValue(parseInt(port));
     });
 
@@ -337,6 +375,37 @@ export class CECTVControl implements DynamicPlatformPlugin {
       tvAccessory.addService(input);
       this.tvService.addLinkedService(input);
     });
+
+    this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier)
+      .on('get', this.getInputStatus.bind(this))
+      .on('set', this.setInputStatus.bind(this));
+  }
+
+  getInputStatus(callback) {
+    this.log.info('Checking TV active source status');
+
+    CECHelper.RequestActiveSource();
+
+    callback();
+  }
+
+  setInputStatus(value : number, callback) {
+
+    //Try to check that our input value is within sane limits, and bail out if its not.
+    if(value <= 0 || value >= this.inputs.length) {
+      this.log.error('Could not change TV active source, desired input value was out-of-bounds.' 
+                      + ' (value = ' + value + '| array length = ' + this.inputs.length + ')');
+      return;
+    }
+
+    const desiredInput = this.inputs[value];
+
+    this.log.info('Changing TV active source to ' + desiredInput.displayName + '(Source ' + desiredInput.inputNumber + ')');
+
+    //Send the Active Source signal.
+    CECHelper.ChangeInputTo(desiredInput.inputNumber);
+
+    callback();
   }
 
   /**
