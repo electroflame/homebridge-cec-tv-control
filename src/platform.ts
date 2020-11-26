@@ -396,7 +396,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
     const index = value - 1;
 
     //Try to check that our input value is within sane limits, and bail out if its not.
-    if(index <= 0 || index > this.inputs.length) {
+    if(index < 0 || index > this.inputs.length) {
       this.log.error('Could not change TV active source, desired input value was out-of-bounds.' 
                       + ' (index = ' + index + '| array length = ' + this.inputs.length + ')');
       return;
@@ -404,10 +404,11 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
     const desiredInput = this.inputs[index];
 
-    this.log.info('Changing TV active source to ' + desiredInput.displayName + '(Source ' + desiredInput.inputNumber + ')');
+    this.log.info('Changing TV active source to ' + desiredInput.displayName + ' (Source ' + desiredInput.inputNumber + ')');
+    this.log.debug('Given value is ' + value);
 
     //Send the Active Source signal.
-    CECHelper.ChangeInputTo(desiredInput.inputNumber as number);
+    CECHelper.ChangeInputTo(value);
 
     callback();
   }
