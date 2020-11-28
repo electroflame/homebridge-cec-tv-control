@@ -83,15 +83,21 @@ class CECHelper {
   static ChangeInputTo(value: number) {
     
     //Store our frame string here so we can operate on it below.
-    const frame = this.Event_ChangeActiveSource;
+    let frame = this.Event_ChangeActiveSource;
 
     //Replace the X in our frame string with the proper input value.
-    frame.replace('X', value.toString());
+    //Basically splitting the string on our X, and then joining the two halves together by inserting our value.
+    frame = frame.split('X').join(String(value));
 
+    //Write out the newly-formed frame.
     this.writeCECCommand(frame);
   }
   
-  static writeCECCommand(stringData: string) {
+  /**
+   * Writes the specified stringData out to the CEC-Client.  This handles formatting it with 'tx' and finishing it with the '\n' newline.
+   * @param stringData The CEC frame string that should be written out by the CEC-Client.
+   */
+  private static writeCECCommand(stringData: string) {
     cecClient.stdin.write('tx ' + stringData + '\n');
   }
 }
