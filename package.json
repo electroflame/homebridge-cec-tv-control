@@ -23,7 +23,10 @@
     "prepublishOnly": "npm run lint && npm run build"
   },
   "keywords": [
-    "homebridge-plugin"
+    "homebridge-plugin",
+    "hdmi",
+    "cec",
+    "raspberrypi"
   ],
   "dependencies": {
     "lint": "^0.7.0"
