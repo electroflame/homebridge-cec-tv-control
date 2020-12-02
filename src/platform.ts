@@ -2,6 +2,8 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 
+import {Timekeeper} from './promises';
+
 import {EventEmitter} from 'events';
 import {spawn} from 'child_process';
 const cecClient = spawn('cec-client', ['-d', '8']);
@@ -60,9 +62,16 @@ class CECHelper {
   /**
    * The CEC frame for indicating that this source would like to become the active source.
    * Note: This is NOT usable directly, as it requires having the X character replaced with the desired input value.
-   * Recording 1 -> Broadcast | Active Source
+   * Tuner 1 -> Broadcast | Active Source
    */
-  public static Event_ChangeActiveSource = '1f:82:X0:00';
+  public static Event_ChangeActiveSource = '3f:82:X0:00';
+
+  /**
+   * The CEC frame for indicating that the current source would like to become an inactive source.
+   * Note: This is NOT usable directly, as it requires having the X character replaced with the desired input value.
+   * Tuner 1 -> Broadcast | Inactive Source
+   */
+  public static Event_MarkCurrentSourceInactive = '3f:9D:X0:00';
 
   static RequestPowerStatus() {
     this.writeCECCommand(this.Event_PowerRequest);
@@ -80,16 +89,27 @@ class CECHelper {
    * Sends a CEC frame requesting that the Active Source be changed to the source specified.
    * @param value A number representing the input source we'd like to change to.
    */
-  static ChangeInputTo(value: number) {
+  static async ChangeInputTo(value: number, currentValue: number) {
     
     //Store our frame string here so we can operate on it below.
     let frame = this.Event_ChangeActiveSource;
+
+    let inactiveFrame = this.Event_MarkCurrentSourceInactive;
 
     //Replace the X in our frame string with the proper input value.
     //Basically splitting the string on our X, and then joining the two halves together by inserting our value.
     frame = frame.split('X').join(String(value));
 
-    //Write out the newly-formed frame.
+    //Do the same thing for our inactiveFrame, just using the currentValue.
+    inactiveFrame = inactiveFrame.split('X').join(String(currentValue));
+
+    //Mark the current source as inactive first.
+    this.writeCECCommand(inactiveFrame);
+
+    //Wait 50ms before sending the next command.
+    await Timekeeper.WaitForMilliseconds(50);
+
+    //Write out the newly-formed frame to switch input.
     this.writeCECCommand(frame);
   }
   
@@ -124,6 +144,11 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
   //The array of HDMI inputs.
   inputs;
+
+  /**
+   * The current input value/port number for the active source.
+   */
+  currentInputValue = 0;
 
   //The device's default name.
   name = 'CEC TV';
@@ -254,11 +279,13 @@ export class CECTVControl implements DynamicPlatformPlugin {
     tvEvent.on('INPUT_SWITCHED', port => {
       this.log.debug(`CEC: Input switched to HDMI${port}`);
       this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier).updateValue(parseInt(port));
+      this.currentInputValue = port;
     });
 
     tvEvent.on('INPUT_REQUEST', port => {
       this.log.debug(`CEC: Input is HDMI${port}`);
       this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier).updateValue(parseInt(port));
+      this.currentInputValue = port;
     });
 
     //Set up an automatic callback to call our pollforUpdates method according to our specified poll delay.
@@ -414,7 +441,10 @@ export class CECTVControl implements DynamicPlatformPlugin {
     this.log.debug('Given value is ' + value);
 
     //Send the Active Source signal.
-    CECHelper.ChangeInputTo(value);
+    CECHelper.ChangeInputTo(value, this.currentInputValue);
+
+    //Set the currentInputValue to our value, as it will be the new current value.
+    this.currentInputValue = value;
 
     callback();
   }
