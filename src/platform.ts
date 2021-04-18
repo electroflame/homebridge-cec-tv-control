@@ -480,8 +480,10 @@ export class CECTVControl implements DynamicPlatformPlugin {
     this.log.info('Checking TV power status');
 
     CECHelper.RequestPowerStatus();
-
-    callback();
+    
+    if(callback) {
+      callback();
+    }
   }
 
   setPowerStatus(value, callback) {
@@ -494,7 +496,9 @@ export class CECTVControl implements DynamicPlatformPlugin {
     //Send the on or off signal.
     CECHelper.ChangePowerStatusTo(value);
 
-    callback();
+    if(callback) {
+      callback();
+    }
   }
 
   setupInputSources(tvAccessory: PlatformAccessory) {
@@ -529,7 +533,9 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
     CECHelper.RequestActiveSource();
 
-    callback();
+    if(callback) {
+      callback();
+    }
   }
 
   setInputStatus(value : number, callback) {
@@ -555,7 +561,9 @@ export class CECTVControl implements DynamicPlatformPlugin {
     //Set the currentInputValue to our value, as it will be the new current value.
     this.currentInputValue = value;
 
-    callback();
+    if(callback) {
+      callback();
+    }
   }
 
   /**
