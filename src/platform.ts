@@ -278,13 +278,13 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
     tvEvent.on('INPUT_SWITCHED', port => {
       this.log.debug(`CEC: Input switched to HDMI${port}`);
-      this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier).updateValue(parseInt(port));
+      this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier).updateValue(this.verifyPortIsValid(port));
       this.currentInputValue = port;
     });
 
     tvEvent.on('INPUT_REQUEST', port => {
       this.log.debug(`CEC: Input is HDMI${port}`);
-      this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier).updateValue(parseInt(port));
+      this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier).updateValue(this.verifyPortIsValid(port));
       this.currentInputValue = port;
     });
 
@@ -301,6 +301,34 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
     //We should be done with everything, publish the service.
     this.api.publishExternalAccessories(PLUGIN_NAME, [tvAccessory]);
+  }
+
+  /**
+   * Verifies that a given port number is a valid number.
+   * 
+   * @param port The port that needs to be verified.
+   * @returns A the port number (that is guaranteed to not be NaN or out-of-bounds), or zero if it couldn't be verified.
+   */
+  verifyPortIsValid(port): number {
+    //Convert port to a number first.
+    const numberedPort = Number(port);
+
+    let foundError = false;
+
+    //Try to catch some common issues and set the numberedPort to zero if we encounter a problem.
+
+    if(isNaN(numberedPort)) {
+      this.log.debug('Something went wrong fetching the source input port number(s) (port was NaN).  Input/Source switching may not work.');
+      foundError = true;
+    }
+
+    if(numberedPort < 0) {
+      this.log.debug(`The source input port number was out-of-bounds (${numberedPort}).  Input/Source switching may not work.`);
+      foundError = true;
+    }
+    
+    //We're done, if we found an error return zero, other return our port.
+    return (foundError) ? 0 : numberedPort;
   }
 
   /**
