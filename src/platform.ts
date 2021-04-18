@@ -73,6 +73,20 @@ class CECHelper {
    */
   public static Event_MarkCurrentSourceInactive = '1f:9D:X0:00';
 
+  /**
+   * The CEC frame for indicating that the active route has changed.
+   * Note: This is NOT usable directly, as it requires having the X AND Y characters replaced with the original and destination addresses.
+   * Recording 1 -> TV | Routing Change
+   */
+  public static Event_SourceRouteChange = '10:80:X0:00:Y0:00';
+
+  /**
+   * The CEC frame for indicating that we'd like to request a streaming path change to the specified address.
+   * Note: This is NOT usable directly, as it requires having the X character replaced with the desired input value.
+   * Recording 1 -> TV | Set Stream Path
+   */
+  public static Event_SetStreamPath = '10:86:X0:00';
+
   static RequestPowerStatus() {
     this.writeCECCommand(this.Event_PowerRequest);
   }
@@ -103,13 +117,63 @@ class CECHelper {
     //Do the same thing for our inactiveFrame, just using the currentValue.
     inactiveFrame = inactiveFrame.split('X').join(String(currentValue));
 
-    //Mark the current source as inactive first.
+    //Mark our desired source as active first.
+    this.writeCECCommand(frame);
+
+    //Wait 50ms before sending the next command.
+    await Timekeeper.WaitForMilliseconds(50);
+    
+    //Mark the current source as inactive.
     this.writeCECCommand(inactiveFrame);
+
+    //Additionally, because some devices are stubborn, we should send out Routing Change and Set Stream Path frames, too.
 
     //Wait 50ms before sending the next command.
     await Timekeeper.WaitForMilliseconds(50);
 
-    //Write out the newly-formed frame to switch input.
+    this.sourceRoutingChange(value, currentValue);
+
+    //Wait 50ms before sending the next command.
+    await Timekeeper.WaitForMilliseconds(50);
+
+    this.setStreamPath(value);
+  }
+
+  /**
+   * Sends a CEC frame requesting a Routing Change from the current address to a new address.
+   * @param newValue A number representing the source we'd like to change to.
+   * @param currentValue A number representing the source we're currently using.
+   */
+  private static async sourceRoutingChange(newValue: number, currentValue: number) {
+    
+    //Store our frame string here so we can operate on it below.
+    let frame = this.Event_SourceRouteChange;
+
+    //Replace the X in our frame string with the proper input value.
+    //Basically splitting the string on our X, and then joining the two halves together by inserting our value.
+    frame = frame.split('X').join(String(currentValue));
+
+    //Replace the Y in our frame string with the proper input value.
+    frame = frame.split('Y').join(String(newValue));
+
+    //Write out the newly-formed frame.
+    this.writeCECCommand(frame);
+  }
+
+  /**
+   * Sends a CEC frame requesting a Set Stream Path to a new address.
+   * @param value A number representing the source we'd like to change to.
+   */
+  private static async setStreamPath(value: number) {
+    
+    //Store our frame string here so we can operate on it below.
+    let frame = this.Event_SetStreamPath;
+
+    //Replace the X in our frame string with the proper input value.
+    //Basically splitting the string on our X, and then joining the two halves together by inserting our value.
+    frame = frame.split('X').join(String(value));
+
+    //Write out the newly-formed frame.
     this.writeCECCommand(frame);
   }
   
