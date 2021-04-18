@@ -103,7 +103,7 @@ class CECHelper {
    * Sends a CEC frame requesting that the Active Source be changed to the source specified.
    * @param value A number representing the input source we'd like to change to.
    */
-  static async ChangeInputTo(value: number, currentValue: number) {
+  static async ChangeInputTo(value: number, currentValue: number, useSourceRouting: boolean, useSetStreamPath: boolean) {
     
     //Store our frame string here so we can operate on it below.
     let frame = this.Event_ChangeActiveSource;
@@ -128,15 +128,19 @@ class CECHelper {
 
     //Additionally, because some devices are stubborn, we should send out Routing Change and Set Stream Path frames, too.
 
-    //Wait 50ms before sending the next command.
-    await Timekeeper.WaitForMilliseconds(50);
+    if(useSourceRouting) {
+      //Wait 50ms before sending the next command.
+      await Timekeeper.WaitForMilliseconds(50);
 
-    this.sourceRoutingChange(value, currentValue);
+      this.sourceRoutingChange(value, currentValue);
+    }
 
-    //Wait 50ms before sending the next command.
-    await Timekeeper.WaitForMilliseconds(50);
+    if(useSetStreamPath) {
+      //Wait 50ms before sending the next command.
+      await Timekeeper.WaitForMilliseconds(50);
 
-    this.setStreamPath(value);
+      this.setStreamPath(value);
+    }
   }
 
   /**
@@ -208,6 +212,12 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
   //The array of HDMI inputs.
   inputs;
+
+  //Whether or not to use Source Routing when trying to switch inputs.
+  useSourceRouting = true;
+
+  //Whether or not to use Set Stream Path when trying to switch inputs.
+  useSetStreamPath = true;
 
   /**
    * The current input value/port number for the active source.
@@ -445,6 +455,8 @@ export class CECTVControl implements DynamicPlatformPlugin {
     this.name = config.name || 'CEC TV';
     this.UpdatePollDelay = config.pollingInterval as number || 2500;
     this.inputs = config.inputs;
+    this.useSourceRouting = config.useSourceRouting || true;
+    this.useSetStreamPath = config.useSetStreamPath || true;
 
     //Double-check that the input array is actually set up as an array.
     //If it's not, try and cast it to an array here.
@@ -533,7 +545,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
     this.log.debug('Given value is ' + value);
 
     //Send the Active Source signal.
-    CECHelper.ChangeInputTo(value, this.currentInputValue);
+    CECHelper.ChangeInputTo(value, this.currentInputValue, this.useSourceRouting, this.useSetStreamPath);
 
     //Set the currentInputValue to our value, as it will be the new current value.
     this.currentInputValue = value;

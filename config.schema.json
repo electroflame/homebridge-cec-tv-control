@@ -49,6 +49,18 @@
             }
           }
         }
+      },
+      "useSourceRouting": {
+        "title": "Use Source Routing",
+        "type": "boolean",
+        "default": true,
+        "description": "Some TVs adopt the HDMI-CEC specifications in unusual ways.  Source Routing is another way to try and change TV Inputs.  If enabled, Source Routing will be used in addition to the default Active Source commands."
+      },
+      "useSetStreamPath": {
+        "title": "Use Set Stream Path",
+        "type": "boolean",
+        "default": true,
+        "description": "Some TVs adopt the HDMI-CEC specifications in unusual ways.  Set Stream Path is another way to try and change TV Inputs.  If enabled, Set Stream Path will be used in addition to the default Active Source commands."
       }
     }
   }
