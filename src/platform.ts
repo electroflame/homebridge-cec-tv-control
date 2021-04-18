@@ -62,16 +62,16 @@ class CECHelper {
   /**
    * The CEC frame for indicating that this source would like to become the active source.
    * Note: This is NOT usable directly, as it requires having the X character replaced with the desired input value.
-   * Tuner 1 -> Broadcast | Active Source
+   * Recording 1 -> Broadcast | Active Source
    */
-  public static Event_ChangeActiveSource = '3f:82:X0:00';
+  public static Event_ChangeActiveSource = '1f:82:X0:00';
 
   /**
    * The CEC frame for indicating that the current source would like to become an inactive source.
    * Note: This is NOT usable directly, as it requires having the X character replaced with the desired input value.
-   * Tuner 1 -> Broadcast | Inactive Source
+   * Recording 1 -> Broadcast | Inactive Source
    */
-  public static Event_MarkCurrentSourceInactive = '3f:9D:X0:00';
+  public static Event_MarkCurrentSourceInactive = '1f:9D:X0:00';
 
   static RequestPowerStatus() {
     this.writeCECCommand(this.Event_PowerRequest);
