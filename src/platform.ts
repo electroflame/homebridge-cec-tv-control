@@ -265,8 +265,8 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
     //Bind our power status callbacks.
     this.tvService.getCharacteristic(this.Characteristic.Active)
-      .on('get', this.getPowerStatus.bind(this))
-      .on('set', this.setPowerStatus.bind(this));
+      .onGet(this.getPowerStatus.bind(this))
+      .onSet(this.setPowerStatus.bind(this));
 
     this.log.info('Hooking into cec-client process');
     
@@ -469,14 +469,14 @@ export class CECTVControl implements DynamicPlatformPlugin {
     CECHelper.RequestActiveSource();
   }
 
-  getPowerStatus(callback) {
+  getPowerStatus() {
     this.log.info('Checking TV power status');
 
     CECHelper.RequestPowerStatus();
-    
-    if(callback) {
-      callback();
-    }
+
+    //Return the power status that we already have for now.  We'll update it with the proper value
+    //once we have it returned via the CEC buffer.
+    return this.tvService.getCharacteristic(this.Characteristic.Active).value;
   }
 
   setPowerStatus(value, callback) {
@@ -517,18 +517,18 @@ export class CECTVControl implements DynamicPlatformPlugin {
     });
 
     this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier)
-      .on('get', this.getInputStatus.bind(this))
-      .on('set', this.setInputStatus.bind(this));
+      .onGet(this.getInputStatus.bind(this))
+      .onSet(this.setInputStatus.bind(this));
   }
 
-  getInputStatus(callback) {
+  getInputStatus() {
     this.log.info('Checking TV active source status');
 
     CECHelper.RequestActiveSource();
 
-    if(callback) {
-      callback();
-    }
+    //We need to return something, but we haven't retrieved the input value yet.  Return our last-known input value for now.
+    //Our input will be updated later once we get the data back via the CEC buffer.
+    return this.currentInputValue;
   }
 
   setInputStatus(value : number, callback) {
