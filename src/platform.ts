@@ -426,13 +426,6 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
     if(!this.config) {
       this.log.error('Could not load from the config.  Was the configuration information added properly?');
-    } else {
-      //Add a log entry if the plugin is disabled in the config, just in case somebody forgets.
-      if(this.config.pluginEnabled === false) {
-        this.log.info('This plugin is disabled in its config.  Initialization will not proceed.');
-
-        verificationStatus = false;
-      }
     }
 
     //Check if our inputs array is valid.

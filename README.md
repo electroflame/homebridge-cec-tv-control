@@ -31,7 +31,6 @@ platforms": [
     }
 ]
 ```
-* `pluginEnabled` - If this is set to false, the plugin will not initialize and won't be added to Homebridge.  Essentially this is a way to keep it installed, but not active.
 * `pollingInterval` - **[Required]** This dictates how often the platform will try to query the HDMI-CEC device for its status.  This helps keep things in sync in Homekit if other devices (remotes, other CEC-enabled devices) change your device status.  This value is in milliseconds, so the default 2500 equates to 2.5 seconds.
 
 
