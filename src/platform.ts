@@ -318,7 +318,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
     tvEvent.on('POWER_ON', () => {
       if (!justSwitched) {
         this.log.debug('CEC: Power on');
-        this.tvService.getCharacteristic(this.Characteristic.Active).updateValue(true);
+        this.tvService.getCharacteristic(this.Characteristic.Active).updateValue(1);
         justSwitched = true;
         setTimeout(() => {
           justSwitched = false;
@@ -329,7 +329,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
     tvEvent.on('POWER_OFF', () => {
       if (!justSwitched) {
         this.log.debug('CEC: Power off');
-        this.tvService.getCharacteristic(this.Characteristic.Active).updateValue(false);
+        this.tvService.getCharacteristic(this.Characteristic.Active).updateValue(0);
         justSwitched = true;
         setTimeout(() => {
           justSwitched = false;
@@ -342,7 +342,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
         this.log.debug('CEC: Power standby');
 
         //Standby is usually the same as off, so false works here.
-        this.tvService.getCharacteristic(this.Characteristic.Active).updateValue(false);
+        this.tvService.getCharacteristic(this.Characteristic.Active).updateValue(0);
         justSwitched = true;
         setTimeout(() => {
           justSwitched = false;
@@ -396,13 +396,18 @@ export class CECTVControl implements DynamicPlatformPlugin {
       foundError = true;
     }
 
-    if(numberedPort < 0) {
+    if(numberedPort === undefined) {
+      this.log.debug('Something went wrong fetching the source input port number(s) (undefined).  Input/Source switching may not work.');
+      foundError = true;
+    }
+
+    if(numberedPort < 1) {
       this.log.debug(`The source input port number was out-of-bounds (${numberedPort}).  Input/Source switching may not work.`);
       foundError = true;
     }
     
-    //We're done, if we found an error return zero, other return our port.
-    return (foundError) ? 0 : numberedPort;
+    //We're done, if we found an error return 1 (which should be the lowest HDMI input, i.e. HDMI 1), otherwise return our port.
+    return (foundError) ? 1 : numberedPort;
   }
 
   /**
