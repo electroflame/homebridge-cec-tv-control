@@ -64,10 +64,10 @@ platforms": [
 * `useSourceRouting` - Some TVs adopt the HDMI-CEC specifications in unusual ways.  Source Routing is another way to try and change TV Inputs.  If enabled, Source Routing will be used in addition to the default Active Source commands.
 * `useSetStreamPath` - Some TVs adopt the HDMI-CEC specifications in unusual ways.  Set Stream Path is another way to try and change TV Inputs.  If enabled, Set Stream Path will be used in addition to the default Active Source commands.
 
-**Note on HDMI Input Switching**
+## Note on HDMI Input Switching
 HDMI-CEC is complicated, and switching HDMI Inputs seems to vary wildly depending on how manufacturers implement the HDMI-CEC spec.  The Source Routing and Set Stream Path options are great ways to try and "brute force" input switches beyond the default Active Source and Inactive Source commands that the plugin tries first.  Both options can be enabled at the same time, as a delay is inserted before each type of command is used.  However, if input switching *still* doesn't work with both options enabled I'm not aware of any other options.  Sorry!
 
-**Note**
+## Device Stop Responding?
 The cec-client can sometimes crash, or be given bad information from other devices in the chain leading to an error or segmentation fault.  If this happens, it may lock up, or freeze, causing the TV accessory to become unresponsive.  Restarting the cec-client, or rebooting the host (Raspberry Pi, etc.) should resolve the issue.  This shouldn't happen under normal circumstances, but it's something to be aware of!
 
 *Based on Dominick Han's [homebridge-tv-cec plugin](https://github.com/dominick-han/homebridge-tv-cec)*
