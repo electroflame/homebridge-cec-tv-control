@@ -224,6 +224,12 @@ export class CECTVControl implements DynamicPlatformPlugin {
    */
   currentInputValue = 0;
 
+  /**
+   * The currently-known power state of the TV.
+   * 0 is off/standby, 1 is on.
+   */
+  currentPowerState = 0;
+
   //The device's default name.
   name = 'CEC TV';
 
@@ -318,7 +324,8 @@ export class CECTVControl implements DynamicPlatformPlugin {
     tvEvent.on('POWER_ON', () => {
       if (!justSwitched) {
         this.log.debug('CEC: Power on');
-        this.tvService.getCharacteristic(this.Characteristic.Active).updateValue(1);
+        this.currentPowerState = 1;
+        this.tvService.getCharacteristic(this.Characteristic.Active).updateValue(this.currentPowerState);
         justSwitched = true;
         setTimeout(() => {
           justSwitched = false;
@@ -329,7 +336,8 @@ export class CECTVControl implements DynamicPlatformPlugin {
     tvEvent.on('POWER_OFF', () => {
       if (!justSwitched) {
         this.log.debug('CEC: Power off');
-        this.tvService.getCharacteristic(this.Characteristic.Active).updateValue(0);
+        this.currentPowerState = 0;
+        this.tvService.getCharacteristic(this.Characteristic.Active).updateValue(this.currentPowerState);
         justSwitched = true;
         setTimeout(() => {
           justSwitched = false;
@@ -340,9 +348,10 @@ export class CECTVControl implements DynamicPlatformPlugin {
     tvEvent.on('POWER_STANDBY', () => {
       if (!justSwitched) {
         this.log.debug('CEC: Power standby');
+        this.currentPowerState = 0;
 
         //Standby is usually the same as off, so false works here.
-        this.tvService.getCharacteristic(this.Characteristic.Active).updateValue(0);
+        this.tvService.getCharacteristic(this.Characteristic.Active).updateValue(this.currentPowerState);
         justSwitched = true;
         setTimeout(() => {
           justSwitched = false;
@@ -352,14 +361,14 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
     tvEvent.on('INPUT_SWITCHED', port => {
       this.log.debug(`CEC: Input switched to HDMI${port}`);
-      this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier).updateValue(this.verifyPortIsValid(port));
-      this.currentInputValue = port;
+      this.currentInputValue = this.verifyPortIsValid(port);
+      this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier).updateValue(this.currentInputValue);
     });
 
     tvEvent.on('INPUT_REQUEST', port => {
       this.log.debug(`CEC: Input is HDMI${port}`);
-      this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier).updateValue(this.verifyPortIsValid(port));
-      this.currentInputValue = port;
+      this.currentInputValue = this.verifyPortIsValid(port);
+      this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier).updateValue(this.currentInputValue);
     });
 
     //Set up an automatic callback to call our pollforUpdates method according to our specified poll delay.
@@ -476,10 +485,10 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
     //Return the power status that we already have for now.  We'll update it with the proper value
     //once we have it returned via the CEC buffer.
-    return this.tvService.getCharacteristic(this.Characteristic.Active).value;
+    return this.currentPowerState;
   }
 
-  setPowerStatus(value, callback) {
+  setPowerStatus(value) {
     this.log.info(`Turning TV ${value ? 'on' : 'off'}`);
 
     if(value === this.tvService.getCharacteristic(this.Characteristic.Active).value) {
@@ -488,10 +497,42 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
     //Send the on or off signal.
     CECHelper.ChangePowerStatusTo(value);
+  }
 
-    if(callback) {
-      callback();
+  getInputStatus() {
+    this.log.info('Checking TV active source status');
+
+    CECHelper.RequestActiveSource();
+
+    //We need to return something, but we haven't retrieved the input value yet.  Return our last-known input value for now.
+    //Our input will be updated later once we get the data back via the CEC buffer.
+    return this.currentInputValue;
+  }
+
+  setInputStatus(value) {
+    //We would like value to be a number, so we'll make sure it is before using it.
+    const numberValue = Number(value);
+
+    //Note: we use value - 1 here to convert our value to zero-based for array indexing.
+    const index = numberValue - 1;
+
+    //Try to check that our input value is within sane limits, and bail out if its not.
+    if(index < 0 || index > this.inputs.length) {
+      this.log.error('Could not change TV active source, desired input value was out-of-bounds.' 
+                      + ' (index = ' + index + '| array length = ' + this.inputs.length + ')');
+      return;
     }
+
+    const desiredInput = this.inputs[index];
+
+    this.log.info('Changing TV active source to ' + desiredInput.displayName + ' (Source ' + desiredInput.inputNumber + ')');
+    this.log.debug('Given value is ' + numberValue);
+
+    //Send the Active Source signal.
+    CECHelper.ChangeInputTo(numberValue, this.currentInputValue, this.useSourceRouting, this.useSetStreamPath);
+
+    //Set the currentInputValue to our value, as it will be the new current value.
+    this.currentInputValue = numberValue;
   }
 
   setupInputSources(tvAccessory: PlatformAccessory) {
@@ -519,44 +560,6 @@ export class CECTVControl implements DynamicPlatformPlugin {
     this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier)
       .onGet(this.getInputStatus.bind(this))
       .onSet(this.setInputStatus.bind(this));
-  }
-
-  getInputStatus() {
-    this.log.info('Checking TV active source status');
-
-    CECHelper.RequestActiveSource();
-
-    //We need to return something, but we haven't retrieved the input value yet.  Return our last-known input value for now.
-    //Our input will be updated later once we get the data back via the CEC buffer.
-    return this.currentInputValue;
-  }
-
-  setInputStatus(value : number, callback) {
-
-    //Note: we use value - 1 here to convert our value to zero-based for array indexing.
-    const index = value - 1;
-
-    //Try to check that our input value is within sane limits, and bail out if its not.
-    if(index < 0 || index > this.inputs.length) {
-      this.log.error('Could not change TV active source, desired input value was out-of-bounds.' 
-                      + ' (index = ' + index + '| array length = ' + this.inputs.length + ')');
-      return;
-    }
-
-    const desiredInput = this.inputs[index];
-
-    this.log.info('Changing TV active source to ' + desiredInput.displayName + ' (Source ' + desiredInput.inputNumber + ')');
-    this.log.debug('Given value is ' + value);
-
-    //Send the Active Source signal.
-    CECHelper.ChangeInputTo(value, this.currentInputValue, this.useSourceRouting, this.useSetStreamPath);
-
-    //Set the currentInputValue to our value, as it will be the new current value.
-    this.currentInputValue = value;
-
-    if(callback) {
-      callback();
-    }
   }
 
   /**
