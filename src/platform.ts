@@ -256,6 +256,8 @@ export class CECTVControl implements DynamicPlatformPlugin {
       return;
     }
     const tvName = this.config.name || 'CEC TV';
+    const tvManufacturer = this.config.manufacturer || 'N/A';
+    const tvModel = this.config.model || 'N/A';
     const UUID = this.api.hap.uuid.generate(PLUGIN_NAME);    
     const tvAccessory = new api.platformAccessory(tvName, UUID);
 
@@ -264,8 +266,8 @@ export class CECTVControl implements DynamicPlatformPlugin {
     //Set up the AccessoryInformation Service.
     //There isn't really any information to add right now, but it'll prevent Homekit from displaying "Default" entries.
     tvAccessory.getService(this.Service.AccessoryInformation)
-      ?.setCharacteristic(this.Characteristic.Manufacturer, 'N/A')
-      .setCharacteristic(this.Characteristic.Model, 'N/A')
+      ?.setCharacteristic(this.Characteristic.Manufacturer, tvManufacturer)
+      .setCharacteristic(this.Characteristic.Model, tvModel)
       .setCharacteristic(this.Characteristic.SerialNumber, 'N/A')
       .setCharacteristic(this.Characteristic.FirmwareRevision, 'N/A');
 
