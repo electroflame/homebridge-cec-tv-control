@@ -3,7 +3,7 @@
 [![NPM version](https://badge.fury.io/js/homebridge-cec-tv-control.svg)](https://npmjs.org/package/homebridge-cec-tv-control)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)
 
-Homebridge support for controlling a TV via HDMI-CEC commands.
+Homebridge support for controlling a TV via HDMI-CEC commands.  Requires Homebridge 1.3.1 or greater.
 
 ## IMPORTANT
 This is **very** much a work-in-progress.  Bugs are to be expected.
@@ -25,14 +25,50 @@ Javascript and Typescript are not my main languages -- pointers, tips, and input
 platforms": [
     {
         "name": "CEC TV",
-        "pluginEnabled": true,
+        "manufacturer": "TVMaker",
+        "model": "Best",
         "pollingInterval": 2500,
+        "minimizeLogging": false,
+        "inputs": [
+            {
+                "inputNumber": 1,
+                "displayName": "Apple TV"
+            },
+            {
+                "inputNumber": 2,
+                "displayName": "Raspberry Pi"
+            },
+            {
+                "inputNumber": 3,
+                "displayName": "Xbox"
+            },
+            {
+                "inputNumber": 4,
+                "displayName": "Playstation"
+            }
+        ],
+        "useSourceRouting": true,
+        "useSetStreamPath": true,
         "platform": "TVCECControl"
     }
 ]
 ```
+* `name` - The name that you'd like to show up in Homekit.
+* `manufacturer` - The manufacturer name that you'd like to show up in the device information in Homekit.
+* `model` - The model name that you'd like to show up in the device information in Homekit.
 * `pollingInterval` - **[Required]** This dictates how often the platform will try to query the HDMI-CEC device for its status.  This helps keep things in sync in Homekit if other devices (remotes, other CEC-enabled devices) change your device status.  This value is in milliseconds, so the default 2500 equates to 2.5 seconds.
+* `minimizeLogging` - The plugin periodically logs "informational" data when device status is changed, or polled.  If this is true, those logs will be suppressed.
+* `inputs` - A list of the HDMI inputs supported by your device.  Most TVs shouldn't let you switch to unused HDMI inputs (i.e. with nothing plugged in) so you only need to include inputs that are in-use (i.e. with something plugged into them).
+     - `inputNumber` - **[Required]** This is the input source number, i.e. if this is for HDMI 1 this should be 1.
+     - `displayName` - **[Required]** This is the name that will be exposed to Homekit (and shown in the input selector for the device).
+* `useSourceRouting` - Some TVs adopt the HDMI-CEC specifications in unusual ways.  Source Routing is another way to try and change TV Inputs.  If enabled, Source Routing will be used in addition to the default Active Source commands.
+* `useSetStreamPath` - Some TVs adopt the HDMI-CEC specifications in unusual ways.  Set Stream Path is another way to try and change TV Inputs.  If enabled, Set Stream Path will be used in addition to the default Active Source commands.
 
+**Note on HDMI Input Switching**
+HDMI-CEC is complicated, and switching HDMI Inputs seems to vary wildly depending on how manufacturers implement the HDMI-CEC spec.  The Source Routing and Set Stream Path options are great ways to try and "brute force" input switches beyond the default Active Source and Inactive Source commands that the plugin tries first.  Both options can be enabled at the same time, as a delay is inserted before each type of command is used.  However, if input switching *still* doesn't work with both options enabled I'm not aware of any other options.  Sorry!
+
+**Note**
+The cec-client can sometimes crash, or be given bad information from other devices in the chain leading to an error or segmentation fault.  If this happens, it may lock up, or freeze, causing the TV accessory to become unresponsive.  Restarting the cec-client, or rebooting the host (Raspberry Pi, etc.) should resolve the issue.  This shouldn't happen under normal circumstances, but it's something to be aware of!
 
 *Based on Dominick Han's [homebridge-tv-cec plugin](https://github.com/dominick-han/homebridge-tv-cec)*
 
