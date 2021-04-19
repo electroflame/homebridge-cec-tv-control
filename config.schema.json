@@ -21,6 +21,12 @@
         "required": true,
         "description": "The time (in milliseconds) to wait before polling the CEC device for its status.  For example, 2500 milliseconds is 2.5 seconds.  Polling too quickly may result in inaccurate results."
       },
+      "minimizeLogging": {
+        "title": "Minimize Logging",
+        "type": "boolean",
+        "default": false,
+        "description": "If unticked/disabled, information will be logged when device status is changed, or when it's polled for updates.  If ticked/enabled, these logs will be suppressed.  Warnings and errors will still be logged regardless of this setting."
+      },
       "inputs": {
         "title": "HDMI Inputs (Not Functional Yet)",
         "description": "A list of the HDMI inputs supported by your device.",

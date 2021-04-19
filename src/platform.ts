@@ -203,6 +203,11 @@ export class CECTVControl implements DynamicPlatformPlugin {
   EventWaitTimeout = 5000;
 
   /**
+   * Whether or not informational logging should be minimized/suppressed.
+   */
+  MinimizeLogging = false;
+
+  /**
    * The time (in milliseconds) that we'll wait before checking device status for updates.
    **/ 
   UpdatePollDelay = 2500;
@@ -461,6 +466,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
     this.name = config.name || 'CEC TV';
     this.UpdatePollDelay = config.pollingInterval as number || 2500;
+    this.MinimizeLogging = config.minimizeLogging as boolean || false;
     this.inputs = config.inputs;
     this.useSourceRouting = config.useSourceRouting || true;
     this.useSetStreamPath = config.useSetStreamPath || true;
@@ -479,7 +485,9 @@ export class CECTVControl implements DynamicPlatformPlugin {
   }
 
   getPowerStatus() {
-    this.log.info('Checking TV power status');
+    if(!this.MinimizeLogging) {
+      this.log.info('Checking TV power status');
+    }
 
     CECHelper.RequestPowerStatus();
 
@@ -489,9 +497,12 @@ export class CECTVControl implements DynamicPlatformPlugin {
   }
 
   setPowerStatus(value) {
-    this.log.info(`Turning TV ${value ? 'on' : 'off'}`);
+    if(!this.MinimizeLogging) {
+      this.log.info(`Turning TV ${value ? 'on' : 'off'}`);
+    }
 
     if(value === this.tvService.getCharacteristic(this.Characteristic.Active).value) {
+      //Note: this isn't suppressed with MinimizeLogging, as this is more of a warning than informational.
       this.log.info(`TV is already ${value ? 'on' : 'off'}`);
     }
 
@@ -500,7 +511,9 @@ export class CECTVControl implements DynamicPlatformPlugin {
   }
 
   getInputStatus() {
-    this.log.info('Checking TV active source status');
+    if(!this.MinimizeLogging) {
+      this.log.info('Checking TV active source status');
+    }
 
     CECHelper.RequestActiveSource();
 
@@ -525,7 +538,9 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
     const desiredInput = this.inputs[index];
 
-    this.log.info('Changing TV active source to ' + desiredInput.displayName + ' (Source ' + desiredInput.inputNumber + ')');
+    if(!this.MinimizeLogging) {
+      this.log.info('Changing TV active source to ' + desiredInput.displayName + ' (Source ' + desiredInput.inputNumber + ')');
+    }
     this.log.debug('Given value is ' + numberValue);
 
     //Send the Active Source signal.
