@@ -7,11 +7,11 @@
     "type": "object",
     "properties": {
       "name": {
-        "title": "Default Name",
+        "title": "Name",
         "type": "string",
         "required": true,
         "default": "CEC TV",
-        "description": "This name will be used to give the exposed TV object a default name in Homekit.  This can always be changed to something else in Homekit."
+        "description": "This name will be used to give the exposed TV object a default name in Homekit."
       },
       "manufacturer": {
         "title": "Manufacturer",
