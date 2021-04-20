@@ -7,7 +7,7 @@
     "type": "object",
     "properties": {
       "name": {
-        "title": "Name",
+        "title": "Default Name",
         "type": "string",
         "required": true,
         "default": "CEC TV",

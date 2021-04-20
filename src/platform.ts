@@ -255,7 +255,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
       //Bail out early as something's gone wrong.
       return;
     }
-    const tvName = this.config.name || 'CEC TV';
+    let tvName = this.config.name || 'CEC TV';
     const tvManufacturer = this.config.manufacturer || 'N/A';
     const tvModel = this.config.model || 'N/A';
     const UUID = this.api.hap.uuid.generate(PLUGIN_NAME);    
@@ -271,7 +271,16 @@ export class CECTVControl implements DynamicPlatformPlugin {
       .setCharacteristic(this.Characteristic.SerialNumber, 'N/A')
       .setCharacteristic(this.Characteristic.FirmwareRevision, 'N/A');
 
-    this.tvService = new this.Service.Television(this.name, 'tvService');
+    //The accessory name might've been set in Homekit, so try and retrieve it first.
+    const retrievedName = tvAccessory.getService(this.Service.AccessoryInformation)
+      ?.getCharacteristic(this.Characteristic.Name).value as string;
+    
+    //If we got our name, use it.
+    if(retrievedName) {
+      tvName = retrievedName;
+    }
+
+    this.tvService = new this.Service.Television(tvName, 'tvService');
 
     this.tvService.setCharacteristic(this.Characteristic.ConfiguredName, tvName);
     this.tvService.setCharacteristic(this.Characteristic.SleepDiscoveryMode, this.Characteristic.SleepDiscoveryMode.ALWAYS_DISCOVERABLE);
