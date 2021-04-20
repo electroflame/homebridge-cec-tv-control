@@ -47,6 +47,8 @@ platforms": [
                 "displayName": "Playstation"
             }
         ],
+        "useActiveSource": true,
+        "useInactiveSource": true,
         "useSourceRouting": true,
         "useSetStreamPath": true,
         "platform": "TVCECControl"
@@ -61,11 +63,15 @@ platforms": [
 * `inputs` - A list of the HDMI inputs supported by your device.  Most TVs shouldn't let you switch to unused HDMI inputs (i.e. with nothing plugged in) so you only need to include inputs that are in-use (i.e. with something plugged into them).
      - `inputNumber` - **[Required]** This is the input source number, i.e. if this is for HDMI 1 this should be 1.
      - `displayName` - **[Required]** This is the name that will be exposed to Homekit (and shown in the input selector for the device).
-* `useSourceRouting` - Some TVs adopt the HDMI-CEC specifications in unusual ways.  Source Routing is another way to try and change TV Inputs.  If enabled, Source Routing will be used in addition to the default Active Source commands.
-* `useSetStreamPath` - Some TVs adopt the HDMI-CEC specifications in unusual ways.  Set Stream Path is another way to try and change TV Inputs.  If enabled, Set Stream Path will be used in addition to the default Active Source commands.
+* `useActiveSource` - Active Source is a command sent to the TV that tries to notify it which input would like to be marked 'active'.  Depending on your TV, this might not work as intended due to the TV refusing Active Source commands issued from other devices. If enabled, an Active Source command will be issued when an input change is requested.
+* `useInactiveSource` - Inactive Source is a command sent to the TV that notifies it that the current input is becoming 'inactive'.  Generally this is desired, but for some TVs it might be required to disable this if it causes issues.  If enabled, an Inactive Source command will be issued when an input change is requested.
+* `useSourceRouting` - Some TVs adopt the HDMI-CEC specifications in unusual ways.  Source Routing is another way to try and change TV Inputs.  If enabled, Source Routing will be used in addition to any other commands.
+* `useSetStreamPath` - Some TVs adopt the HDMI-CEC specifications in unusual ways.  Set Stream Path is another way to try and change TV Inputs.  If enabled, Set Stream Path will be used in addition to any other commands.
 
-## Note on HDMI Input Switching
+## Notes on HDMI Input Switching
 HDMI-CEC is complicated, and switching HDMI Inputs seems to vary wildly depending on how manufacturers implement the HDMI-CEC spec.  The Source Routing and Set Stream Path options are great ways to try and "brute force" input switches beyond the default Active Source and Inactive Source commands that the plugin tries first.  Both options can be enabled at the same time, as a delay is inserted before each type of command is used.  However, if input switching *still* doesn't work with both options enabled I'm not aware of any other options.  Sorry!
+
+Additionally, you're in full control of what HDMI-CEC frames (commands) are sent in regards to input switching.  What works well for one TV may not work at all on another one.  The Active Source and Inactive Source commands should generally be the most stable to use, but if you only have two inputs in-use Active Source may cause issues due to the TV automatically switching to the only other available input when Inactive Source is sent.  If your TV flickers between two inputs, disabling Active Source (and possibly Inactive Source) could fix it.
 
 ## Device Stop Responding?
 The cec-client can sometimes crash, or be given bad information from other devices in the chain leading to an error or segmentation fault.  If this happens, it may lock up, or freeze, causing the TV accessory to become unresponsive.  Restarting the cec-client, or rebooting the host (Raspberry Pi, etc.) should resolve the issue.  This shouldn't happen under normal circumstances, but it's something to be aware of!

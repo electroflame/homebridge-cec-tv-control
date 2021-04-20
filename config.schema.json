@@ -62,17 +62,29 @@
           }
         }
       },
+      "useActiveSource": {
+        "title": "Use Active Source",
+        "type": "boolean",
+        "default": true,
+        "description": "Active Source is a command sent to the TV that tries to notify it which input would like to be marked 'active'.  Depending on your TV, this might not work as intended due to the TV refusing Active Source commands issued from other devices. If enabled, an Active Source command will be issued when an input change is requested."
+      },
+      "useInactiveSource": {
+        "title": "Use Inactive Source",
+        "type": "boolean",
+        "default": true,
+        "description": "Inactive Source is a command sent to the TV that notifies it that the current input is becoming 'inactive'.  Generally this is desired, but for some TVs it might be required to disable this if it causes issues.  If enabled, an Inactive Source command will be issued when an input change is requested."
+      },
       "useSourceRouting": {
         "title": "Use Source Routing",
         "type": "boolean",
         "default": true,
-        "description": "Some TVs adopt the HDMI-CEC specifications in unusual ways.  Source Routing is another way to try and change TV Inputs.  If enabled, Source Routing will be used in addition to the default Active Source commands."
+        "description": "Some TVs adopt the HDMI-CEC specifications in unusual ways.  Source Routing is another way to try and change TV Inputs.  If enabled, Source Routing will be used in addition to any other commands."
       },
       "useSetStreamPath": {
         "title": "Use Set Stream Path",
         "type": "boolean",
         "default": true,
-        "description": "Some TVs adopt the HDMI-CEC specifications in unusual ways.  Set Stream Path is another way to try and change TV Inputs.  If enabled, Set Stream Path will be used in addition to the default Active Source commands."
+        "description": "Some TVs adopt the HDMI-CEC specifications in unusual ways.  Set Stream Path is another way to try and change TV Inputs.  If enabled, Set Stream Path will be used in addition to any other commands."
       }
     }
   }

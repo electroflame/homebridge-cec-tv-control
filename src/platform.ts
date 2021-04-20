@@ -103,7 +103,8 @@ class CECHelper {
    * Sends a CEC frame requesting that the Active Source be changed to the source specified.
    * @param value A number representing the input source we'd like to change to.
    */
-  static async ChangeInputTo(value: number, currentValue: number, useSourceRouting: boolean, useSetStreamPath: boolean) {
+  static async ChangeInputTo(value: number, currentValue: number, 
+    useActiveSource: boolean, useInactiveSource: boolean, useSourceRouting: boolean, useSetStreamPath: boolean) {
     
     //Store our frame string here so we can operate on it below.
     let frame = this.Event_ChangeActiveSource;
@@ -115,31 +116,42 @@ class CECHelper {
     frame = frame.split('X').join(String(value));
 
     //Do the same thing for our inactiveFrame, just using the currentValue.
-    inactiveFrame = inactiveFrame.split('X').join(String(currentValue));
+    inactiveFrame = inactiveFrame.split('X').join(String(currentValue)); 
 
-    //Mark our desired source as active first.
-    this.writeCECCommand(frame);
+    if(useActiveSource) {
 
-    //Wait 50ms before sending the next command.
-    await Timekeeper.WaitForMilliseconds(50);
-    
-    //Mark the current source as inactive.
-    this.writeCECCommand(inactiveFrame);
+      //Mark our desired source as active.
+      this.writeCECCommand(frame);
+
+      //Wait 50ms before sending the next command.
+      await Timekeeper.WaitForMilliseconds(50);
+    }
+
+    if(useInactiveSource){
+
+      //Mark the current source as inactive.
+      this.writeCECCommand(inactiveFrame);
+
+      //Wait 50ms before sending the next command.
+      await Timekeeper.WaitForMilliseconds(50);
+    }
 
     //Additionally, because some devices are stubborn, we should send out Routing Change and Set Stream Path frames, too.
 
     if(useSourceRouting) {
-      //Wait 50ms before sending the next command.
-      await Timekeeper.WaitForMilliseconds(50);
 
       this.sourceRoutingChange(value, currentValue);
+
+      //Wait 50ms before sending the next command.
+      await Timekeeper.WaitForMilliseconds(50);
     }
 
     if(useSetStreamPath) {
-      //Wait 50ms before sending the next command.
-      await Timekeeper.WaitForMilliseconds(50);
 
       this.setStreamPath(value);
+
+      //Wait 50ms before sending the next command.
+      await Timekeeper.WaitForMilliseconds(50);
     }
   }
 
@@ -217,6 +229,12 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
   //The array of HDMI inputs.
   inputs;
+
+  //Whether or not to use Active Source when trying to switch inputs.
+  useActiveSource = true;
+
+  //Whether or not to use Inactive Source when trying to switch inputs.
+  useInactiveSource = true;
 
   //Whether or not to use Source Routing when trying to switch inputs.
   useSourceRouting = true;
@@ -479,6 +497,8 @@ export class CECTVControl implements DynamicPlatformPlugin {
     this.UpdatePollDelay = config.pollingInterval as number || 2500;
     this.MinimizeLogging = config.minimizeLogging as boolean || false;
     this.inputs = config.inputs;
+    this.useInactiveSource = config.useInactiveSource || true;
+    this.useActiveSource = config.useActiveSource || true;
     this.useSourceRouting = config.useSourceRouting || true;
     this.useSetStreamPath = config.useSetStreamPath || true;
 
@@ -547,6 +567,13 @@ export class CECTVControl implements DynamicPlatformPlugin {
       return;
     }
 
+    //If every CEC command related to input switching has been disabled in the config, output an error and bail out early.
+    if(!this.useActiveSource && !this.useInactiveSource && !this.useSourceRouting && !this.useSetStreamPath) {
+      this.log.error('Could not change TV input, as every input switch command has been disabled in the plugin configuration.');
+
+      return;
+    }
+
     const desiredInput = this.inputs[index];
 
     if(!this.MinimizeLogging) {
@@ -555,7 +582,8 @@ export class CECTVControl implements DynamicPlatformPlugin {
     this.log.debug('Given value is ' + numberValue);
 
     //Send the Active Source signal.
-    CECHelper.ChangeInputTo(numberValue, this.currentInputValue, this.useSourceRouting, this.useSetStreamPath);
+    CECHelper.ChangeInputTo(numberValue, this.currentInputValue, 
+      this.useActiveSource, this.useInactiveSource, this.useSourceRouting, this.useSetStreamPath);
 
     //Set the currentInputValue to our value, as it will be the new current value.
     this.currentInputValue = numberValue;
