@@ -60,7 +60,8 @@ platforms": [
 * `model` - The model name that you'd like to show up in the device information in Homekit.
 * `pollingInterval` - **[Required]** This dictates how often the platform will try to query the HDMI-CEC device for its status.  This helps keep things in sync in Homekit if other devices (remotes, other CEC-enabled devices) change your device status.  This value is in milliseconds, so the default 2500 equates to 2.5 seconds.
 * `minimizeLogging` - The plugin periodically logs "informational" data when device status is changed, or polled.  If this is true, those logs will be suppressed.
-* `inputs` - A list of the HDMI inputs supported by your device.  Most TVs shouldn't let you switch to unused HDMI inputs (i.e. with nothing plugged in) so you only need to include inputs that are in-use (i.e. with something plugged into them).
+* `inputs` - A list of the HDMI inputs supported by your device.  Most TVs shouldn't let you switch to unused HDMI inputs (i.e. with nothing plugged in) so you only need to include inputs that are in-use (i.e. with something plugged into them).  
+**Note:** It's important to keep your inputs sequential (i.e. include HDMI 1, 2, 3, etc. in that order)
      - `inputNumber` - **[Required]** This is the input source number, i.e. if this is for HDMI 1 this should be 1.
      - `displayName` - **[Required]** This is the name that will be exposed to Homekit (and shown in the input selector for the device).
 * `useActiveSource` - Active Source is a command sent to the TV that tries to notify it which input would like to be marked 'active'.  Depending on your TV, this might not work as intended due to the TV refusing Active Source commands issued from other devices. If enabled, an Active Source command will be issued when an input change is requested.
