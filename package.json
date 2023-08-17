@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge CEC TV Control",
   "name": "homebridge-cec-tv-control",
-  "version": "0.1.18.1",
+  "version": "0.1.18",
   "description": "Provides a Homebridge Platform for controlling a connected HDMI device via CEC commands.",
   "license": "MIT",
   "repository": {
