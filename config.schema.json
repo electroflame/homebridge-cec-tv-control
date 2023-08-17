@@ -25,6 +25,12 @@
         "default": "N/A",
         "description": "This is the model of your TV.  This isn't required, but it will be added to the accessory information in Homekit."
       },
+      "serialNumber": {
+        "title": "Serial Number",
+        "type": "string",
+        "default": "DEFAULT SN",
+        "description": "This is the serial number of your TV.  This isn't required, but it will be added to the accessory information in Homekit."
+      },
       "pollingInterval": {
         "title": "Polling Interval",
         "type": "integer",
