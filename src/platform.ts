@@ -276,7 +276,8 @@ export class CECTVControl implements DynamicPlatformPlugin {
     const tvName = this.config.name || 'CEC TV';
     const tvManufacturer = this.config.manufacturer || 'N/A';
     const tvModel = this.config.model || 'N/A';
-    const tvSerialNumber = this.config.serialNumber || 'DEFAULT SN';
+    const tvSerialNumber = this.config.serialNumber || 'N/A';
+    const tvFirmwareRevision = this.config.firmwareRevision || 'N/A';
     const UUID = this.api.hap.uuid.generate(PLUGIN_NAME);    
     const tvAccessory = new api.platformAccessory(tvName, UUID);
 
@@ -288,7 +289,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
       ?.setCharacteristic(this.Characteristic.Manufacturer, tvManufacturer)
       .setCharacteristic(this.Characteristic.Model, tvModel)
       .setCharacteristic(this.Characteristic.SerialNumber, tvSerialNumber)
-      .setCharacteristic(this.Characteristic.FirmwareRevision, '1.0');
+      .setCharacteristic(this.Characteristic.FirmwareRevision, tvFirmwareRevision);
 
     this.tvService = new this.Service.Television(tvName, 'tvService');
 
