@@ -28,8 +28,14 @@
       "serialNumber": {
         "title": "Serial Number",
         "type": "string",
-        "default": "DEFAULT SN",
+        "default": "N/A",
         "description": "This is the serial number of your TV.  This isn't required, but it will be added to the accessory information in Homekit."
+      },
+      "firmwareRevision": {
+        "title": "Firmware Revision",
+        "type": "string",
+        "default": "N/A",
+        "description": "This is the firmware version of your TV.  This isn't required, but it will be added to the accessory information in Homekit."
       },
       "pollingInterval": {
         "title": "Polling Interval",
