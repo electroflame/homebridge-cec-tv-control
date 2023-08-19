@@ -61,8 +61,8 @@ platforms": [
 * `name` - The name that you'd like to show up in Homekit.
 * `manufacturer` - The manufacturer name that you'd like to show up in the device information in Homekit.
 * `model` - The model name that you'd like to show up in the device information in Homekit.
-* `serialNumber` - The serial number that you'd like to show up in Homekit. Best to set to prevent errors with duplicate serials. Can be anything, and should be unique.
-* `firmwareRevision` - The firmware version that you'd like to show up in Homekit. Can be anything. Default is N/A
+* `serialNumber` - The serial number that you'd like to show up in Homekit. It is best to set this to prevent errors with duplicate serial numbers. Can be anything, and should be unique. Default is N/A.
+* `firmwareRevision` - The firmware version that you'd like to show up in Homekit. Can be anything. Default is N/A.
 * `pollingInterval` - **[Required]** This dictates how often the platform will try to query the HDMI-CEC device for its status.  This helps keep things in sync in Homekit if other devices (remotes, other CEC-enabled devices) change your device status.  This value is in milliseconds, so the default 2500 equates to 2.5 seconds.
 * `minimizeLogging` - The plugin periodically logs "informational" data when device status is changed, or polled.  If this is true, those logs will be suppressed.
 * `inputs` - A list of the HDMI inputs supported by your device.  Most TVs shouldn't let you switch to unused HDMI inputs (i.e. with nothing plugged in) so you only need to include inputs that are in-use (i.e. with something plugged into them).  
