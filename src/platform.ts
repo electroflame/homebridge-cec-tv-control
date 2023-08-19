@@ -284,7 +284,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
     tvAccessory.category = this.api.hap.Categories.TELEVISION;
 
     //Set up the AccessoryInformation Service.
-    //There isn't really any information to add right now, but it'll prevent Homekit from displaying "Default" entries.
+    //The information either comes from the config or the default value 'N/A' to prevent Homekit from displaying "Default" entries.
     tvAccessory.getService(this.Service.AccessoryInformation)
       ?.setCharacteristic(this.Characteristic.Manufacturer, tvManufacturer)
       .setCharacteristic(this.Characteristic.Model, tvModel)
