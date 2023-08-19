@@ -13,6 +13,7 @@ Javascript and Typescript are not my main languages -- pointers, tips, and input
 ## Installation
 1. This is a plugin for Homebridge, so you'll need to install [homebridge](https://github.com/homebridge/homebridge) if you haven't already.  Be sure to install Node and NPM as well.
 2. Install the plugin using NPM: `sudo npm install -g homebridge-cec-tv-control`
+    * (Unless in `hb-shell` environment, then type `hb-service add homebridge-cec-tv-control` instead).
 3. Install the `cec-utils` package if the `cec-client` command is not present in your terminal: `sudo apt-get install cec-utils`
 * Additionally, cec-utils might not be available based on what distribution you're using.  You can also search for libCEC, as that might be packaged and available in your package manager.
 * On Raspberry Pi's OSMC image, `cec-cilent` is present at `/usr/osmc/bin/cec-client-4.0.2`, you'll need to run `sudo ln -s /usr/osmc/bin/cec-client-4.0.2 /usr/bin/cec-client` to link it to the default `$PATH` 
@@ -27,6 +28,8 @@ platforms": [
         "name": "CEC TV",
         "manufacturer": "TVMaker",
         "model": "Best",
+        "serialNumber": "CECTV01",
+        "firmwareRevision": "1.0",
         "pollingInterval": 2500,
         "minimizeLogging": false,
         "inputs": [
@@ -58,6 +61,8 @@ platforms": [
 * `name` - The name that you'd like to show up in Homekit.
 * `manufacturer` - The manufacturer name that you'd like to show up in the device information in Homekit.
 * `model` - The model name that you'd like to show up in the device information in Homekit.
+* `serialNumber` - The serial number that you'd like to show up in Homekit. Best to set to prevent errors with duplicate serials. Can be anything, and should be unique.
+* `firmwareRevision` - The firmware version that you'd like to show up in Homekit. Can be anything. Default is N/A
 * `pollingInterval` - **[Required]** This dictates how often the platform will try to query the HDMI-CEC device for its status.  This helps keep things in sync in Homekit if other devices (remotes, other CEC-enabled devices) change your device status.  This value is in milliseconds, so the default 2500 equates to 2.5 seconds.
 * `minimizeLogging` - The plugin periodically logs "informational" data when device status is changed, or polled.  If this is true, those logs will be suppressed.
 * `inputs` - A list of the HDMI inputs supported by your device.  Most TVs shouldn't let you switch to unused HDMI inputs (i.e. with nothing plugged in) so you only need to include inputs that are in-use (i.e. with something plugged into them).  
