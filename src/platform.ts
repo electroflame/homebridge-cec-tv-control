@@ -282,6 +282,8 @@ export class CECTVControl implements DynamicPlatformPlugin {
     const tvAccessory = new api.platformAccessory(tvName, UUID);
 
     tvAccessory.category = this.api.hap.Categories.TELEVISION;
+
+    //log firmware
     this.log.debug(`Firmware Revision: ${tvFirmwareRevision}`);
 
     //Set up the AccessoryInformation Service.
@@ -292,6 +294,9 @@ export class CECTVControl implements DynamicPlatformPlugin {
       .setCharacteristic(this.Characteristic.SerialNumber, tvSerialNumber)
       .setCharacteristic(this.Characteristic.FirmwareRevision, tvFirmwareRevision);
 
+    //log firmware
+    this.log.debug(`Firmware Revision set to: ${tvFirmwareRevision}`);
+    
     this.tvService = new this.Service.Television(tvName, 'tvService');
 
     this.tvService.setCharacteristic(this.Characteristic.ConfiguredName, tvName);
