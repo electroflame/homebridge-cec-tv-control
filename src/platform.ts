@@ -283,9 +283,6 @@ export class CECTVControl implements DynamicPlatformPlugin {
 
     tvAccessory.category = this.api.hap.Categories.TELEVISION;
 
-    //log firmware
-    this.log.info(`Firmware Revision: ${tvFirmwareRevision}`);
-
     //Set up the AccessoryInformation Service.
     //There isn't really any information to add right now, but it'll prevent Homekit from displaying "Default" entries.
     tvAccessory.getService(this.Service.AccessoryInformation)
@@ -294,9 +291,6 @@ export class CECTVControl implements DynamicPlatformPlugin {
       .setCharacteristic(this.Characteristic.SerialNumber, tvSerialNumber)
       .setCharacteristic(this.Characteristic.FirmwareRevision, tvFirmwareRevision);
 
-    //log firmware
-    this.log.info(`Firmware Revision set to: ${tvFirmwareRevision}`);
-    
     this.tvService = new this.Service.Television(tvName, 'tvService');
 
     this.tvService.setCharacteristic(this.Characteristic.ConfiguredName, tvName);
