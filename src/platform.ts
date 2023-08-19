@@ -292,7 +292,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
       ?.setCharacteristic(this.Characteristic.Manufacturer, tvManufacturer)
       .setCharacteristic(this.Characteristic.Model, tvModel)
       .setCharacteristic(this.Characteristic.SerialNumber, tvSerialNumber)
-      .setCharacteristic(this.Characteristic.FirmwareRevision, tvFirmwareRevision);
+      .setCharacteristic(this.Characteristic.FirmwareRevision, this.config.firmwareRevision);
 
     //log firmware
     this.log.debug(`Firmware Revision set to: ${tvFirmwareRevision}`);
