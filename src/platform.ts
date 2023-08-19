@@ -282,6 +282,7 @@ export class CECTVControl implements DynamicPlatformPlugin {
     const tvAccessory = new api.platformAccessory(tvName, UUID);
 
     tvAccessory.category = this.api.hap.Categories.TELEVISION;
+    this.log.debug(`Firmware Revision: ${tvFirmwareRevision}`);
 
     //Set up the AccessoryInformation Service.
     //There isn't really any information to add right now, but it'll prevent Homekit from displaying "Default" entries.
