@@ -604,6 +604,9 @@ export class CECTVControl implements DynamicPlatformPlugin {
       this.tvService.addLinkedService(input);
     });
 
+    const displayOrder = this.inputs.map(inputConfig => inputConfig.inputNumber);
+    this.tvService.setCharacteristic(this.Characteristic.DisplayOrder, this.api.hap.encode(1, displayOrder).toString('base64'));
+
     this.tvService.getCharacteristic(this.Characteristic.ActiveIdentifier)
       .onGet(this.getInputStatus.bind(this))
       .onSet(this.setInputStatus.bind(this));
